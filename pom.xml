@@ -162,7 +162,6 @@
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.38</version>
                         </exclude>
                     </excludes>
                 </configuration>
