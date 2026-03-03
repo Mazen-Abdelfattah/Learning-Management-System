@@ -76,8 +76,8 @@
         @ManyToMany
         @JoinTable(
                 name = "course_students",
-                joinColumns = @JoinColumn(name = "student_id"),
-                inverseJoinColumns = @JoinColumn(name = "course_id")
+                joinColumns = @JoinColumn(name = "course_id"),
+                inverseJoinColumns = @JoinColumn(name = "student_id")
         )
             private List<User> studentEnrolledCourses = new ArrayList<>();
     
