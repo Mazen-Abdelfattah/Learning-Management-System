@@ -2,6 +2,7 @@ package org.software.lms.service;
 
 import jakarta.transaction.Transactional;
 import org.software.lms.dto.LessonDTO;
+import org.software.lms.dto.LessonResponseDto;
 import org.software.lms.exception.ResourceNotFoundException;
 import org.software.lms.model.Course;
 import org.software.lms.model.Lesson;
@@ -12,6 +13,8 @@ import org.software.lms.repository.LessonRepository;
 import org.software.lms.repository.LessonResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -58,11 +62,27 @@ public class LessonService {
 
     }
 
-    public List<Lesson> getLessonsByCourse(Long courseId) {
+    @Cacheable(value = "lessons", key = "#courseId")
+    public List<LessonResponseDto> getLessonsByCourse(Long courseId) {
         if (!courseRepository.existsById(courseId)) {
             throw new ResourceNotFoundException("Course not found with id: " + courseId);
         }
-        return lessonRepository.findByCourse_IdOrderByOrderIndexAsc(courseId);
+
+        return lessonRepository.findByCourse_IdOrderByOrderIndexAsc(courseId)
+                .stream()
+                .map(lesson -> new LessonResponseDto(
+                        lesson.getId(),
+                        lesson.getTitle(),
+                        lesson.getDescription(),
+                        lesson.getDuration(),
+                        lesson.getOrderIndex(),
+                        courseId,
+                        lesson.getCreatedAt(),
+                        lesson.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
+
+//        return lessonRepository.findByCourse_IdOrderByOrderIndexAsc(courseId);
     }
 
     public Lesson getLessonById(Long courseId, Long lessonId) {
@@ -71,6 +91,7 @@ public class LessonService {
                         "Lesson not found with id: " + lessonId + " in course: " + courseId));
     }
 
+    @CacheEvict(value = "lessons", key = "#courseId")
     public Lesson updateLesson(Long courseId, Long lessonId, LessonDTO lessonDTO) {
         Lesson lesson = getLessonById(courseId, lessonId);
 
@@ -83,6 +104,7 @@ public class LessonService {
         return lessonRepository.save(lesson);
     }
 
+    @CacheEvict(value = "lessons", key = "#courseId")
     public void deleteLesson(Long courseId, Long lessonId) {
         Lesson lesson = getLessonById(courseId, lessonId);
         // Delete associated resources from filesystem

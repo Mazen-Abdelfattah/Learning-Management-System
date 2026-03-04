@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.software.lms.dto.UserDto;
 import org.software.lms.exception.ResourceNotFoundException;
 import org.software.lms.model.Course;
 import org.software.lms.model.Lesson;
@@ -219,7 +220,7 @@ class CourseServiceTest {
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
 
-        List<User> result = courseService.findStudentEnrolledInCourse(courseId);
+        List<UserDto> result = courseService.findStudentEnrolledInCourse(courseId);
 
         assertEquals(2, result.size());
     }

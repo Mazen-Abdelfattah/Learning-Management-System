@@ -1,6 +1,7 @@
 package org.software.lms.controller;
 
 import org.software.lms.dto.CourseDto;
+import org.software.lms.dto.UserDto;
 import org.software.lms.model.Course;
 import org.software.lms.model.User;
 import org.software.lms.repository.UserRepository;
@@ -51,8 +52,8 @@ public class CourseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     public Course updateCourse(@PathVariable Long CourseId, @RequestBody Course updatedCourse) {
         Course course = courseService.updateCourse(CourseId, updatedCourse);
-        List<User> enrolledStudents = findStudentEnrolledInCourse(CourseId);
-        for (User stud : enrolledStudents) {
+        List<UserDto> enrolledStudents = findStudentEnrolledInCourse(CourseId);
+        for (UserDto stud : enrolledStudents) {
             Long StudId = stud.getId();
             String title = "Course Updated";
             String message = "Course Information has been updated";
@@ -64,8 +65,8 @@ public class CourseController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     public void deleteCourse(@PathVariable Long id) {
-        List<User> enrolledStudents = findStudentEnrolledInCourse(id);
-        for (User stud : enrolledStudents) {
+        List<UserDto> enrolledStudents = findStudentEnrolledInCourse(id);
+        for (UserDto stud : enrolledStudents) {
             Long StudId = stud.getId();
             String title = "Course Deletion";
             String message = "Course has been deleted";
@@ -90,9 +91,9 @@ public class CourseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     public ResponseEntity<Course> addInstructorsToCourse(@PathVariable Long id, @RequestBody List<Long> instructorIds) {
         Course course = courseService.addInstructorsToCourse(id, instructorIds); // Use 'id' here
-        List<User> enrolledStudents = findStudentEnrolledInCourse(id); // Use 'id' here
+        List<UserDto> enrolledStudents = findStudentEnrolledInCourse(id); // Use 'id' here
         if(enrolledStudents!=null) {
-            for (User stud : enrolledStudents) {
+            for (UserDto stud : enrolledStudents) {
                 Long StudId = stud.getId();
                 String title = "New Instructor";
                 String message = "A new Instructor has been added to the course";
@@ -166,7 +167,7 @@ public class CourseController {
 
     @GetMapping("/{id}/studentEnrolled")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
-    public List<User> findStudentEnrolledInCourse(@PathVariable Long id) {
+    public List<UserDto> findStudentEnrolledInCourse(@PathVariable Long id) {
         return courseService.findStudentEnrolledInCourse(id);
     }
 }

@@ -8,6 +8,8 @@ import org.software.lms.model.Role;
 import org.software.lms.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +53,7 @@ public class UserServiceImpl implements UserService {
         return savedUserDto;
     }
 
+    @Cacheable(value = "users", key = "#id")
     @Override
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
@@ -98,6 +101,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @CacheEvict(value = "users", key = "#id")
     @Override
     public UserDto updateUser(Long id, UserDto userDto) {
         User existingUser = userRepository.findById(id)
@@ -115,6 +119,7 @@ public class UserServiceImpl implements UserService {
         return updatedUserDto;
     }
 
+    @CacheEvict(value = "users", key = "#id")
     @Override
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
@@ -138,10 +143,11 @@ public class UserServiceImpl implements UserService {
         return userDto;
     }
 
+    @CacheEvict(value = "users", key = "#id")
     @Override
-    public UserDto updateProfile(Long userId, ProfileUpdateDto profileUpdateDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    public UserDto updateProfile(Long id, ProfileUpdateDto profileUpdateDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
         // Validate email if it's being updated
         if (profileUpdateDto.getEmail() != null &&

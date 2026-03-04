@@ -2,6 +2,8 @@ package org.software.lms.controller;
 
 import jakarta.validation.Valid;
 import org.software.lms.dto.LessonDTO;
+import org.software.lms.dto.LessonResponseDto;
+import org.software.lms.dto.UserDto;
 import org.software.lms.exception.ResourceNotFoundException;
 import org.software.lms.model.Lesson;
 import org.software.lms.model.ResourceType;
@@ -46,8 +48,8 @@ public class LessonController {
             @PathVariable Long courseId,
             @Valid @RequestBody LessonDTO lessonDTO) {
         Lesson createdLesson = lessonService.createLesson(courseId, lessonDTO);
-        List<User> enrolledStudents = courseService.findStudentEnrolledInCourse(courseId);
-        for (User stud : enrolledStudents) {
+        List<UserDto> enrolledStudents = courseService.findStudentEnrolledInCourse(courseId);
+        for (UserDto stud : enrolledStudents) {
             Long StudId = stud.getId();
             String title = "New Lesson";
             String message = "new Lesson has been Added to the course.";
@@ -57,8 +59,8 @@ public class LessonController {
 
     }
     @GetMapping
-    public ResponseEntity<List<Lesson>> getLessonsByCourse(@PathVariable Long courseId) {
-        List<Lesson> lessons = lessonService.getLessonsByCourse(courseId);
+    public ResponseEntity<List<LessonResponseDto>> getLessonsByCourse(@PathVariable Long courseId) {
+        List<LessonResponseDto> lessons = lessonService.getLessonsByCourse(courseId);
         return ResponseEntity.ok(lessons);
     }
 

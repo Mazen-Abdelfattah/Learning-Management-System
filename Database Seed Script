@@ -1,0 +1,286 @@
+-- ================================================================
+-- LMS Seed Data Script
+-- Generates realistic volume for benchmarking Redis vs no-Redis
+-- Run this against your local MySQL LMS database
+
+
+It gives:
+| tbl | total |
+| :--- | :--- |
+| users | 560 |
+| quizzes | 300 |
+| lessons | 800 |
+| courses | 100 |
+| course\_students | 15000 |
+| course\_instructor | 150 |
+
+
+-- ================================================================
+
+-- Disable checks for faster inserts
+SET FOREIGN_KEY_CHECKS = 0;
+SET UNIQUE_CHECKS = 0;
+
+-- ================================================================
+-- CLEAN SLATE
+-- ================================================================
+DELETE FROM course_students;
+DELETE FROM course_instructor;
+DELETE FROM lesson_students;
+DELETE FROM quizzes;
+DELETE FROM lessons;
+DELETE FROM courses;
+DELETE FROM users;
+
+ALTER TABLE users AUTO_INCREMENT = 1;
+ALTER TABLE courses AUTO_INCREMENT = 1;
+ALTER TABLE lessons AUTO_INCREMENT = 1;
+ALTER TABLE quizzes AUTO_INCREMENT = 1;
+
+-- ================================================================
+-- ADMINS (ids 1-10)
+-- ================================================================
+INSERT INTO users (first_name, last_name, email, password, role, created_at) VALUES
+                                                                                 ('Admin','One',   'admin1@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Two',   'admin2@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Three', 'admin3@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Four',  'admin4@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Five',  'admin5@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Six',   'admin6@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Seven', 'admin7@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Eight', 'admin8@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Nine',  'admin9@lms.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW()),
+                                                                                 ('Admin','Ten',   'admin10@lms.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','ADMIN',NOW());
+
+-- ================================================================
+-- INSTRUCTORS (ids 11-60)
+-- ================================================================
+INSERT INTO users (first_name, last_name, email, password, role, created_at) VALUES
+                                                                                 ('James','Smith','instructor1@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Mary','Johnson','instructor2@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Robert','Williams','instructor3@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Patricia','Brown','instructor4@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('John','Jones','instructor5@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Linda','Garcia','instructor6@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Michael','Miller','instructor7@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Barbara','Davis','instructor8@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('William','Rodriguez','instructor9@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Elizabeth','Martinez','instructor10@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('David','Hernandez','instructor11@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Susan','Lopez','instructor12@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Richard','Gonzalez','instructor13@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Jessica','Wilson','instructor14@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Joseph','Anderson','instructor15@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Sarah','Thomas','instructor16@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Thomas','Taylor','instructor17@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Karen','Moore','instructor18@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Charles','Jackson','instructor19@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Nancy','Martin','instructor20@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Christopher','Lee','instructor21@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Lisa','Perez','instructor22@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Matthew','Thompson','instructor23@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Betty','White','instructor24@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Anthony','Harris','instructor25@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Margaret','Sanchez','instructor26@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Mark','Clark','instructor27@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Sandra','Ramirez','instructor28@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Donald','Lewis','instructor29@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Ashley','Robinson','instructor30@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Steven','Walker','instructor31@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Kimberly','Young','instructor32@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Paul','Allen','instructor33@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Emily','King','instructor34@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Andrew','Wright','instructor35@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Donna','Scott','instructor36@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Joshua','Torres','instructor37@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Michelle','Nguyen','instructor38@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Kenneth','Hill','instructor39@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Carol','Flores','instructor40@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Kevin','Green','instructor41@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Amanda','Adams','instructor42@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Brian','Nelson','instructor43@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Melissa','Baker','instructor44@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('George','Hall','instructor45@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Deborah','Rivera','instructor46@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Timothy','Campbell','instructor47@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Stephanie','Mitchell','instructor48@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Ronald','Carter','instructor49@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW()),
+                                                                                 ('Sharon','Roberts','instructor50@lms.com','$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.','INSTRUCTOR',NOW());
+
+-- ================================================================
+-- STUDENTS (500 students, ids 61-560)
+-- Uses inline cross join — no temp table, no recursive CTE
+-- ================================================================
+INSERT INTO users (first_name, last_name, email, password, role, created_at)
+SELECT
+    CONCAT('Student', n),
+    CONCAT('User', n),
+    CONCAT('student', n, '@lms.com'),
+    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.',
+    'STUDENT',
+    DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 365) DAY)
+FROM (
+         SELECT a.n + b.n * 10 + c.n * 100 + 1 AS n
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4) c
+         HAVING n BETWEEN 1 AND 500
+     ) AS student_nums;
+
+-- ================================================================
+-- COURSES (100 courses)
+-- ================================================================
+INSERT INTO courses (title, description, duration, created_at, updated_at)
+SELECT
+    CONCAT(
+            ELT(FLOOR(1 + RAND() * 10),
+                'Introduction to','Advanced','Fundamentals of','Mastering','Professional',
+                'Complete','Modern','Practical','Applied','Deep Dive into'),
+            ' ',
+            ELT(FLOOR(1 + RAND() * 20),
+                'Java Programming','Spring Boot','Data Structures','Algorithms','Machine Learning',
+                'Web Development','Database Design','Software Architecture','Cloud Computing','DevOps',
+                'React.js','Python','Cybersecurity','Mobile Development','Microservices',
+                'Docker & Kubernetes','System Design','REST APIs','Design Patterns','Agile Methods')
+    ),
+    CONCAT('A comprehensive course covering essential topics with hands-on projects. Course #', n),
+    FLOOR(60 + RAND() * 300),
+    DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 500) DAY),
+    DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 100) DAY)
+FROM (
+         SELECT a.n + b.n * 10 + 1 AS n
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+         HAVING n BETWEEN 1 AND 100
+     ) AS course_nums;
+
+-- ================================================================
+-- LESSONS (8 per course = 800 lessons)
+-- current_otp and otp_generated_at explicitly NULL
+-- ================================================================
+INSERT INTO lessons (title, description, course_id, duration, order_index,
+                     otp, otp_expiration_time,
+                     currentotp, otp_generated_at,
+                     created_at, updated_at)
+SELECT
+    CONCAT(
+            ELT(lesson_num,
+                'Getting Started','Core Concepts','Hands-On Practice','Deep Dive',
+                'Advanced Topics','Real-World Application','Best Practices','Final Project'),
+            ' - Part ', lesson_num
+    ),
+    CONCAT('Key concepts and practical exercises. Lesson ', lesson_num, ' of course ', course_num, '.'),
+    course_num,
+    FLOOR(20 + RAND() * 90),
+    lesson_num,
+    CONCAT('OTP-', course_num, '-', lesson_num),  -- unique, satisfies NOT NULL + UNIQUE
+    NOW(),                                          -- otp_expiration_time, NOT NULL
+    NULL,                                           -- currentotp, nullable
+    NULL,                                           -- otp_generated_at, nullable
+    DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 400) DAY),
+    DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 50) DAY)
+FROM (
+         SELECT a.n + b.n * 10 + 1 AS course_num
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+         HAVING course_num BETWEEN 1 AND 100
+     ) courses_gen,
+     (SELECT 1 AS lesson_num UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+      UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8) lessons_gen;
+
+-- ================================================================
+-- QUIZZES (3 per course = 300 quizzes)
+-- ================================================================
+INSERT INTO quizzes (title, duration, number_of_questions, course_id, created_at)
+SELECT
+    ELT(quiz_num, 'Quiz 1: Fundamentals', 'Quiz 2: Intermediate', 'Final Assessment'),
+    FLOOR(15 + RAND() * 45),
+    FLOOR(5 + RAND() * 20),
+    course_num,
+    DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 300) DAY)
+FROM (
+         SELECT a.n + b.n * 10 + 1 AS course_num
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+         HAVING course_num BETWEEN 1 AND 100
+     ) courses_gen,
+     (SELECT 1 AS quiz_num UNION SELECT 2 UNION SELECT 3) quizzes_gen;
+
+-- ================================================================
+-- COURSE_INSTRUCTOR
+-- ================================================================
+INSERT INTO course_instructor (course_id, instructor_id)
+SELECT course_num, 11 + MOD(course_num - 1, 50)
+FROM (
+         SELECT a.n + b.n * 10 + 1 AS course_num
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+         HAVING course_num BETWEEN 1 AND 100
+     ) g;
+
+-- Second instructor for even courses
+INSERT INTO course_instructor (course_id, instructor_id)
+SELECT course_num, 11 + MOD(course_num + 24, 50)
+FROM (
+         SELECT a.n + b.n * 10 + 1 AS course_num
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+         HAVING course_num BETWEEN 1 AND 100 AND MOD(course_num, 2) = 0
+     ) g;
+
+-- ================================================================
+-- COURSE_STUDENTS (~15,000 enrollments)
+-- ================================================================
+INSERT INTO course_students (student_id, course_id)
+SELECT DISTINCT 60 + s.n AS student_id, c.n AS course_id
+FROM (
+         SELECT a.n + b.n * 10 + c.n * 100 + 1 AS n
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4) c
+         HAVING n BETWEEN 1 AND 500
+     ) s,
+     (
+         SELECT a.n + b.n * 10 + 1 AS n
+         FROM
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a,
+             (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+              UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+         HAVING n BETWEEN 1 AND 100
+     ) c
+WHERE MOD((s.n * 7 + c.n * 13), 10) < 3;
+
+SET FOREIGN_KEY_CHECKS = 1;
+SET UNIQUE_CHECKS = 1;
+
+-- ================================================================
+-- VERIFY
+-- ================================================================
+SELECT 'users'             AS tbl, COUNT(*) AS total FROM users
+UNION ALL SELECT 'courses',         COUNT(*) FROM courses
+UNION ALL SELECT 'lessons',         COUNT(*) FROM lessons
+UNION ALL SELECT 'quizzes',         COUNT(*) FROM quizzes
+UNION ALL SELECT 'course_students', COUNT(*) FROM course_students
+UNION ALL SELECT 'course_instructor',COUNT(*) FROM course_instructor;

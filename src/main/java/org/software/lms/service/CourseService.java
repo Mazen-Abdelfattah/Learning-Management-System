@@ -1,6 +1,7 @@
 package org.software.lms.service;
 
 import jakarta.transaction.Transactional;
+import org.software.lms.dto.UserDto;
 import org.software.lms.exception.ResourceNotFoundException;
 import org.software.lms.model.Course;
 import org.software.lms.model.Lesson;
@@ -10,6 +11,8 @@ import org.software.lms.repository.CourseRepository;
 import org.software.lms.repository.LessonRepository;
 import org.software.lms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
@@ -110,6 +114,7 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
+    @CacheEvict(value = "enrolledStudents", key = "#courseId")
     public Course addStudentsToCourse(Long courseId, List<Long> studentsIds) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
@@ -127,6 +132,7 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
+    @CacheEvict(value = "lessons", key = "#courseId")
     public Course addLessonsToCourse(Long courseId, List<Long> lessonIds) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
@@ -141,9 +147,6 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-
-
-
     public void deleteInstructorFromCourse(Long courseId, Long instructorId) {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
         User instructor = userRepository.findById(instructorId).orElseThrow(() -> new RuntimeException("Instructor not found"));
@@ -151,6 +154,8 @@ public class CourseService {
         course.getInstructors().remove(instructor);
         courseRepository.save(course);
     }
+
+    @CacheEvict(value = "enrolledStudents", key = "#courseId")
     public void deleteStudentFromCourse(Long courseId, Long studentId) {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
         User student = userRepository.findById(studentId).orElseThrow(() -> new RuntimeException("Student not found"));
@@ -159,8 +164,14 @@ public class CourseService {
         courseRepository.save(course);
     }
 
-    public List<User> findStudentEnrolledInCourse(Long id) {
-        Course course = courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course not found"));
-        return course.getStudentEnrolledCourses();
+    @Cacheable(value = "enrolledStudents", key = "#courseId")
+    public List<UserDto> findStudentEnrolledInCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+
+        List<User> users = course.getStudentEnrolledCourses();
+        return users.stream()
+                .map(user -> new UserDto(user.getId(), user.getFirstName(),
+                        user.getLastName(), user.getEmail(), user.getPassword(), user.getRole()))
+                .collect(Collectors.toList());
     }
 }
