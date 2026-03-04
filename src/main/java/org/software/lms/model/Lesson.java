@@ -37,11 +37,6 @@ public class Lesson {
     @JsonIgnore
     private List<LessonAttendance> attendanceRecords = new ArrayList<>();
 
-    private String currentOTP;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date otpGeneratedAt;
-
     @Column(nullable = false)
     private Integer duration;
 
@@ -167,22 +162,6 @@ public class Lesson {
 
     public void setOrderIndex(Integer orderIndex) {
         this.orderIndex = orderIndex;
-    }
-
-    public String getCurrentOTP() {
-        return currentOTP;
-    }
-
-    public void setCurrentOTP(String currentOTP) {
-        this.currentOTP = currentOTP;
-    }
-
-    public Date getOtpGeneratedAt() {
-        return otpGeneratedAt;
-    }
-
-    public void setOtpGeneratedAt(Date otpGeneratedAt) {
-        this.otpGeneratedAt = otpGeneratedAt;
     }
 
     public Date getCreatedAt() {

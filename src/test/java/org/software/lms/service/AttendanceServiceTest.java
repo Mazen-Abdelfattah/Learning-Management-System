@@ -47,8 +47,6 @@ class AttendanceServiceTest {
     void setUp() {
         mockLesson = new Lesson();
         mockLesson.setId(1L);
-        mockLesson.setCurrentOTP("123456");
-        mockLesson.setOtpGeneratedAt(new Date());
 
         mockStudent = new User();
         mockStudent.setId(1L);
