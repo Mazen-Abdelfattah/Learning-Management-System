@@ -1,11 +1,10 @@
 # Learning Management System (LMS)
 [![Java](https://img.shields.io/badge/Java-17-blue?logo=java&logoColor=white)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x-brightgreen?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot) [![MySQL](https://img.shields.io/badge/MySQL-8.x-blue?logo=mysql&logoColor=white)](https://www.mysql.com/)  
-[![Docker](https://img.shields.io/badge/Docker-Containerized-blue?logo=docker&logoColor=white)](https://www.docker.com/) 
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x-brightgreen?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![MySQL](https://img.shields.io/badge/MySQL-8.x-blue?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-blue?logo=docker&logoColor=white)](https://www.docker.com/)
 [![build](https://github.com/Mazen-Abdelfattah/Learning-Management-System/actions/workflows/ci.yml/badge.svg)](https://github.com/Mazen-Abdelfattah/Learning-Management-System/actions)
-![Redis](https://img.shields.io/badge/Redis-Caching-red) 
-
-[//]: # ([![license]&#40;https://img.shields.io/badge/license-MIT-blue.svg&#41;]&#40;#&#41;)
+![Redis](https://img.shields.io/badge/Redis-Caching-red)
 
 A full-featured, production-ready Learning Management System built with Java Spring Boot. Supports role-based access for Admins, Instructors, and Students with course management, OTP-based attendance tracking, assessments, grading, and real-time notifications.
 
@@ -21,7 +20,6 @@ A full-featured, production-ready Learning Management System built with Java Spr
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Testing](#testing)
 - [Project Structure](#project-structure)
-- [License](#license)
 
 ---
 
@@ -98,10 +96,8 @@ Controller  →  Service  →  Repository  →  Database (MySQL)
 ### Prerequisites
 
 - Java 17+
-- MySQL 8.0+
-- Redis 7+
 - Maven 3.6+
-- Docker (optional, for containerized runs)
+- Docker + Docker Compose
 
 ### 1. Clone the Repository
 
@@ -110,46 +106,39 @@ git clone https://github.com/Mazen-Abdelfattah/Learning-Management-System.git
 cd Learning-Management-System
 ```
 
-### 2. Set Up the Database
+### 2. Configure Environment Variables
 
-```sql
-CREATE DATABASE lms;
+Create a `.env` file in the project root:
+
+```env
+DB_USERNAME=lms_user
+DB_PASSWORD=your_password
+JWT_SECRET=your_jwt_secret
 ```
 
-### 3. Start Redis
+> **Note:** `.env` is in `.gitignore` and should never be committed.
+
+### 3. Start Infrastructure (MySQL + Redis)
 
 ```bash
-docker run -d --name redis-lms -p 6379:6379 redis:7-alpine
+docker-compose up -d mysql redis
 ```
 
-### 4. Configure the Application
+This spins up MySQL on port `3307` and Redis on port `6379`. Both include health checks — the app won't start until they're ready.
 
-Copy and update `src/main/resources/application.properties`:
+### 4. Run the Application
 
-```properties
-# Database
-spring.datasource.url=jdbc:mysql://localhost:3306/lms?useSSL=false&allowPublicKeyRetrieval=true
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
+**Option A — IntelliJ (recommended for development):**
 
-# Redis
-spring.data.redis.host=localhost
-spring.data.redis.port=6379
+Add the same env vars from `.env` to your IntelliJ Run Configuration:
+`Run → Edit Configurations → Environment Variables`
 
-# JWT
-jwt.secret=your_jwt_secret
+Then run `LmsApplication` normally.
 
-# File uploads
-file.upload.directory=./uploads
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-```
-
-### 5. Run the Application
+**Option B — Full Docker stack:**
 
 ```bash
-mvn spring-boot:run
+docker-compose up --build
 ```
 
 The API will be available at `http://localhost:8080`.
@@ -158,121 +147,33 @@ The API will be available at `http://localhost:8080`.
 
 ## Configuration
 
-### Environment Variables (used in CI and production)
+### application.properties
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3307/lms?useSSL=false&allowPublicKeyRetrieval=true
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+
+jwt.secret=${JWT_SECRET}
+
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+
+file.upload.directory=./uploads
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+```
+
+### Environment Variables
 
 | Variable | Description |
 |---|---|
-| `SPRING_DATASOURCE_USERNAME` | MySQL username |
-| `SPRING_DATASOURCE_PASSWORD` | MySQL password |
+| `DB_USERNAME` | MySQL username |
+| `DB_PASSWORD` | MySQL password |
 | `JWT_SECRET` | Secret key for signing JWT tokens |
-| `SPRING_DATA_REDIS_HOST` | Redis host (default: localhost) |
-| `SPRING_DATA_REDIS_PORT` | Redis port (default: 6379) |
 
 ---
-
-[//]: # ()
-[//]: # (## API Endpoints)
-
-[//]: # ()
-[//]: # (### Authentication)
-
-[//]: # (| Method | Endpoint | Description |)
-
-[//]: # (|---|---|---|)
-
-[//]: # (| POST | `/api/auth/register` | Register a new user |)
-
-[//]: # (| POST | `/api/auth/login` | Login and receive JWT token |)
-
-[//]: # ()
-[//]: # (### Users)
-
-[//]: # (| Method | Endpoint | Access |)
-
-[//]: # (|---|---|---|)
-
-[//]: # (| GET | `/api/users` | Admin |)
-
-[//]: # (| GET | `/api/users/{id}` | Admin / Own user |)
-
-[//]: # (| PUT | `/api/users/{id}` | Admin / Own user |)
-
-[//]: # (| DELETE | `/api/users/{id}` | Admin |)
-
-[//]: # ()
-[//]: # (### Courses)
-
-[//]: # (| Method | Endpoint | Access |)
-
-[//]: # (|---|---|---|)
-
-[//]: # (| POST | `/api/courses` | Admin, Instructor |)
-
-[//]: # (| GET | `/api/courses` | All |)
-
-[//]: # (| GET | `/api/courses/{id}` | All |)
-
-[//]: # (| PUT | `/api/courses/{id}` | Admin, Instructor |)
-
-[//]: # (| DELETE | `/api/courses/{id}` | Admin, Instructor |)
-
-[//]: # (| POST | `/api/courses/{id}/students` | All |)
-
-[//]: # (| POST | `/api/courses/{id}/instructors` | Admin, Instructor |)
-
-[//]: # (| GET | `/api/courses/{id}/studentEnrolled` | Admin, Instructor |)
-
-[//]: # ()
-[//]: # (### Lessons)
-
-[//]: # (| Method | Endpoint | Access |)
-
-[//]: # (|---|---|---|)
-
-[//]: # (| POST | `/api/courses/{courseId}/lessons` | Admin, Instructor |)
-
-[//]: # (| GET | `/api/courses/{courseId}/lessons` | All |)
-
-[//]: # (| GET | `/api/courses/{courseId}/lessons/{lessonId}` | All |)
-
-[//]: # (| PUT | `/api/courses/{courseId}/lessons/{lessonId}` | All |)
-
-[//]: # (| DELETE | `/api/courses/{courseId}/lessons/{lessonId}` | Admin, Instructor |)
-
-[//]: # (| POST | `/api/courses/{courseId}/lessons/{lessonId}/resources` | All |)
-
-[//]: # (| GET | `/api/courses/{courseId}/lessons/{lessonId}/resources` | All |)
-
-[//]: # ()
-[//]: # (### Attendance)
-
-[//]: # (| Method | Endpoint | Description |)
-
-[//]: # (|---|---|---|)
-
-[//]: # (| POST | `/api/courses/{courseId}/lessons/{lessonId}/attendance/generate-otp` | Generate OTP &#40;Instructor&#41; |)
-
-[//]: # (| POST | `/api/courses/{courseId}/lessons/{lessonId}/attendance/mark` | Mark attendance &#40;Student&#41; |)
-
-[//]: # (| GET | `/api/courses/{courseId}/lessons/{lessonId}/attendance` | View attendance &#40;Instructor&#41; |)
-
-[//]: # ()
-[//]: # (### Quizzes & Assignments)
-
-[//]: # (| Method | Endpoint | Description |)
-
-[//]: # (|---|---|---|)
-
-[//]: # (| POST | `/api/courses/{courseId}/quizzes` | Create quiz |)
-
-[//]: # (| POST | `/api/courses/{courseId}/assignments` | Create assignment |)
-
-[//]: # (| POST | `/api/courses/{courseId}/assignments/{id}/submit` | Submit assignment |)
-
-[//]: # (| PUT | `/api/courses/{courseId}/assignments/{assignmentId}/submissions/{submissionId}/grade` | Grade submission |)
-
-[//]: # ()
-[//]: # (---)
 
 ## Caching Strategy
 
@@ -310,7 +211,7 @@ Instructor calls generate-otp
 
 Student calls mark-attendance with OTP
     → Redis key checked: otp:lesson:{lessonId}
-    → If null → "No OTP generated or OTP expired"
+    → If null  → "No OTP generated or OTP expired"
     → If wrong → "Invalid OTP"
     → If correct → attendance record saved to MySQL
 ```
@@ -326,7 +227,7 @@ GitHub Actions workflow runs on every push and pull request to `main`.
 **Job 1 — Build & Test:**
 1. Spins up a Redis service container (health-checked before tests run)
 2. Sets up Java 17
-3. Runs `mvn test` with database and Redis credentials injected from GitHub Secrets
+3. Runs `mvn test` with credentials injected from GitHub Secrets
 4. Builds the JAR with `mvn package -DskipTests`
 
 **Job 2 — Docker Build & Push** *(runs on push to main only):*
@@ -382,8 +283,12 @@ src/
 │   └── java/org/software/lms/
 │       └── service/         # Unit tests
 ├── Dockerfile
+├── docker-compose.yml
 └── pom.xml
 ```
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
