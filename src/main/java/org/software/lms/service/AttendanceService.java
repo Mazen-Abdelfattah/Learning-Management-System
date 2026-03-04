@@ -9,11 +9,13 @@ import org.software.lms.repository.LessonAttendanceRepository;
 import org.software.lms.repository.LessonRepository;
 import org.software.lms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -27,7 +29,11 @@ public class AttendanceService {
     @Autowired
     private LessonAttendanceRepository attendanceRepository;
 
-    private static final long OTP_VALIDITY_PERIOD = 10 * 60 * 1000; // 10 minutes
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    private static final String OTP_KEY_PREFIX = "otp:lesson:";
+    private static final long OTP_VALIDITY_MINUTES = 10;
     private static final int OTP_LENGTH = 6;
 
     public String generateOTP(Long courseId, Long lessonId) {
@@ -35,9 +41,10 @@ public class AttendanceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
 
         String otp = generateRandomOTP();
-        lesson.setCurrentOTP(otp);
-        lesson.setOtpGeneratedAt(new Date());
-        lessonRepository.save(lesson);
+
+        // Store in Redis with 10-minute TTL instead of writing to DB
+        String key = OTP_KEY_PREFIX + lessonId;
+        redisTemplate.opsForValue().set(key, otp, OTP_VALIDITY_MINUTES, TimeUnit.MINUTES);
 
         return otp;
     }
@@ -95,19 +102,15 @@ public class AttendanceService {
     }
 
     private void validateOTP(Lesson lesson, String submittedOTP) {
-        String currentOTP = lesson.getCurrentOTP();
-        Date otpGeneratedAt = lesson.getOtpGeneratedAt();
+        String key = OTP_KEY_PREFIX + lesson.getId();
+        String storedOTP = redisTemplate.opsForValue().get(key);
 
-        if (currentOTP == null || otpGeneratedAt == null) {
-            throw new IllegalStateException("No OTP has been generated for this lesson");
+        if (storedOTP == null) {
+            throw new IllegalStateException("No OTP has been generated for this lesson, or it has expired");
         }
 
-        if (!currentOTP.equals(submittedOTP)) {
+        if (!storedOTP.equals(submittedOTP)) {
             throw new IllegalStateException("Invalid OTP");
-        }
-
-        if (System.currentTimeMillis() - otpGeneratedAt.getTime() > OTP_VALIDITY_PERIOD) {
-            throw new IllegalStateException("OTP has expired");
         }
     }
 }

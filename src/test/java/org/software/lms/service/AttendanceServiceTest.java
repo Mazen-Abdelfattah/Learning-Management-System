@@ -9,6 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.software.lms.model.*;
 import org.software.lms.repository.*;
 import org.software.lms.service.*;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import java.util.concurrent.TimeUnit;
+import static org.mockito.Mockito.never;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +31,13 @@ class AttendanceServiceTest {
 
     @Mock
     private LessonAttendanceRepository attendanceRepository;
+
+    @Mock
+    private StringRedisTemplate redisTemplate;
+
+    @Mock
+    private org.springframework.data.redis.core.ValueOperations<String, String> valueOperations;
+
 
     private Lesson mockLesson;
     private User mockStudent;
@@ -54,20 +64,23 @@ class AttendanceServiceTest {
     @Test
     void testGenerateOTP() {
         when(lessonRepository.findByIdAndCourse_Id(1L, 1L)).thenReturn(Optional.of(mockLesson));
-        when(lessonRepository.save(any(Lesson.class))).thenReturn(mockLesson);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         String otp = attendanceService.generateOTP(1L, 1L);
 
         assertNotNull(otp);
         assertEquals(6, otp.length());
         verify(lessonRepository, times(1)).findByIdAndCourse_Id(1L, 1L);
-        verify(lessonRepository, times(1)).save(mockLesson);
+        verify(lessonRepository, never()).save(any()); // no longer saves to DB
+        verify(valueOperations, times(1)).set(anyString(), anyString(), eq(10L), eq(TimeUnit.MINUTES));
     }
 
     @Test
     void testMarkAttendance() {
         when(lessonRepository.findByIdAndCourse_Id(1L, 1L)).thenReturn(Optional.of(mockLesson));
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockStudent));
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(anyString())).thenReturn("123456");
         when(attendanceRepository.findByLessonAndStudent(mockLesson, mockStudent)).thenReturn(Optional.empty());
         when(attendanceRepository.save(any(LessonAttendance.class))).thenReturn(mockAttendance);
 
@@ -84,6 +97,8 @@ class AttendanceServiceTest {
     void testMarkAttendanceWithInvalidOTP() {
         when(lessonRepository.findByIdAndCourse_Id(1L, 1L)).thenReturn(Optional.of(mockLesson));
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockStudent));
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(anyString())).thenReturn("123456");
 
         Exception exception = assertThrows(IllegalStateException.class, () ->
                 attendanceService.markAttendance(1L, 1L, 1L, "654321"));
@@ -95,6 +110,8 @@ class AttendanceServiceTest {
     void testMarkAttendanceAlreadyMarked() {
         when(lessonRepository.findByIdAndCourse_Id(1L, 1L)).thenReturn(Optional.of(mockLesson));
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockStudent));
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(anyString())).thenReturn("123456");
         when(attendanceRepository.findByLessonAndStudent(mockLesson, mockStudent))
                 .thenReturn(Optional.of(mockAttendance));
 
